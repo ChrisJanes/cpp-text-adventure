@@ -43,6 +43,10 @@ const vector<string> TakeCmd{ "take", "t", "pickup", "pick-up" };
 const vector<string> DropCmd{ "drop", "d", "throw"};
 const vector<string> UseCmd{ "use", "u" };
 
+void gameOver() {
+	cout << "game over, you won.\n";
+}
+
 void printSeparator()
 {
 	cout << "\n*********************************************************************\n";
