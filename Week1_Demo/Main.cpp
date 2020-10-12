@@ -43,6 +43,11 @@ const vector<string> TakeCmd{ "take", "t", "pickup", "pick-up" };
 const vector<string> DropCmd{ "drop", "d", "throw"};
 const vector<string> UseCmd{ "use", "u" };
 
+void gameOver(string message)
+{
+	cout << "Game Over\n" << message << '\n';
+}
+
 void printSeparator()
 {
 	cout << "\n*********************************************************************\n";
@@ -384,6 +389,8 @@ int main()
 
 	printPlayerWelcome(playerName);
 	roomOne();
+
+	gameOver("You won!");
 
 	return 0;
 }
