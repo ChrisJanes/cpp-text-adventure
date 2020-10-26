@@ -22,7 +22,7 @@
 	Revised Febrary 2 2015: randint() can now be seeded (see exercise 5.13).
 	Revised June 15 for defaultfloat hack for older GCCs
 */
-
+#pragma once
 #ifndef H112
 #define H112 020215L
 
