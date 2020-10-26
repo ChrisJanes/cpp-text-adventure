@@ -6,6 +6,7 @@
 #include "RoomExit.h"
 #include "Player.h"
 #include "Item.h"
+#include "Enemy.h"
 
 /*
 5--3--6
@@ -19,15 +20,6 @@ using std::vector;
 using std::cout;
 using std::cin;
 
-const vector<string> NorthDir{ "north", "n"};
-const vector<string> SouthDir{ "south", "s" };
-const vector<string> EastDir{ "east", "e" };
-const vector<string> WestDir{ "west", "w" };
-const vector<string> QuitCmd{ "quit", "q", "exit"};
-const vector<string> TakeCmd{ "take", "t", "pickup", "pick-up" };
-const vector<string> DropCmd{ "drop", "d", "throw"};
-const vector<string> UseCmd{ "use", "u" };
-
 void gameOver(string message)
 {
 	cout << "Game Over\n" << message << '\n';
@@ -36,17 +28,6 @@ void gameOver(string message)
 void printSeparator()
 {
 	cout << "\n*********************************************************************\n";
-}
-
-bool checkCommand(string cmd, const vector<string> commands)
-{
-	for (const string dir : commands)
-	{
-		if (cmd == dir) 
-			return true;
-	}
-
-	return false;
 }
 
 struct Exit : std::runtime_error {
@@ -71,6 +52,9 @@ int main()
 
 	Player player;
 
+	CombatItem shield("shield", "made of wood and leather, it might be sturdy", 0, 0, 4);
+	Enemy orc("Orc", "it's big and green, like the hulk", 5, 2, 1, dynamic_cast<Item*>(&shield));
+
 	roomOne.AddExit("east", roomTwo);
 	roomOne.AddExit("north", roomThree);
 
@@ -85,17 +69,25 @@ int main()
 	// R4 goes to room 2 (north)
 	roomFour.AddExit("north", roomTwo);
 
-	// R5 goes to room 3 (east)
-	roomFive.AddExit("east", roomThree);
+	// R5 goes to room 3 (west)
+	roomFive.AddExit("west", roomThree);
 
-	// R6 goes to room 3 (west)
-	roomSix.AddExit("west", roomThree);
+	// R6 goes to room 3 (east)
+	roomSix.AddExit("east", roomThree);
+	roomSix.AddEnemy(&orc);
 
-	Item trowel{ "trowel", "it's caked in mud and rust" };
+	Item key{ "key", "it looks like it will fit the front door", "The key twists in the lock smoothly, the door swings open.", nullptr };
+	key.make_victory_item();
+	key.set_target_room(&roomOne);
+	Item trowel{ "trowel", "it's caked in mud and rust", "you dig through the mud and find a key", &key };
+	trowel.set_target_room(&roomTwo);
 	Item kettle{ "kettle", "it's half full of stagnant water" };
+
+	CombatItem sword{ "sword", "it's shiny and sharp", 4, 0, 0 };
 
 	roomFour.AddItem(&trowel); 
 	roomThree.AddItem(&kettle);
+	roomThree.AddItem(&sword);
 
 	currentRoom = &roomOne;
 
@@ -108,12 +100,20 @@ int main()
 		if (currentRoom->shouldQuit)
 			break;
 
+		if (currentRoom->hasWon)
+			break;
+
 		if (newRoom != nullptr)
+		{
+			system("cls");
 			currentRoom = newRoom;
+		}
 	}
 
-
-	gameOver("You won!");
+	if (currentRoom->hasWon)
+		gameOver("You won!");
+	else
+		gameOver("Thanks for playing");
 
 	return 0;
 }
