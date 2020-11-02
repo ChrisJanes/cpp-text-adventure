@@ -6,6 +6,7 @@
 using std::cout;
 using std::cin;
 
+// helper function to check a cmd against a vector of valid commands
 inline bool checkCommand(string cmd, const vector<string> commands)
 {
 	for (const string dir : commands)
@@ -17,7 +18,9 @@ inline bool checkCommand(string cmd, const vector<string> commands)
 	return false;
 }
 
-void Room::getCommand()
+// just get input from the user - should probably pass in the output string here or
+// do away with this completely.
+void Room::get_command()
 {
 	cout << "What do you want to do?\n";
 	cin >> commandString;
@@ -26,6 +29,7 @@ void Room::getCommand()
 
 bool Room::print_item(Item* item, string name)
 {
+	// print the item stats
 	if (item->get_item_name() == name)
 	{
 		if (dynamic_cast<CombatItem*>(item))
@@ -39,29 +43,35 @@ bool Room::print_item(Item* item, string name)
 	return false;
 }
 
-void Room::AddEnemy(Enemy* en)
+void Room::add_enemy(Enemy* en)
 {
 	if (enemy != nullptr) return;
 
 	enemy = en;
 }
 
-void Room::AddExit(string dir, Room &room)
+void Room::add_exit(string dir, Room &room)
 {
 	RoomExit exit{ dir, room };
 	exits.push_back(exit);
 }
 
-Room* Room::RunCommands(Player& player)
+// big scary core function
+// a series of calls to "checkCommand", should be refactored nicely probably
+// a small but neat parser with grammar could be good here.
+Room* Room::run_commands(Player& player)
 {
-	shouldQuit = false;
+	should_quit = false;
 	commandString = "";
-	getCommand();
+	get_command(); // reads into commandString
 	bool handledCommand = false;
 
 	if (commandString == "") return nullptr;
 
-	for (RoomExit exit : exits) {
+	// check against directions
+	// todo: make this work with the const direction vectors
+	for (RoomExit exit : exits) 
+	{
 		if (commandString == exit.direction)
 		{
 			return &exit.exitLocation;
@@ -108,13 +118,13 @@ Room* Room::RunCommands(Player& player)
 		{
 			Item* output = used_item->get_result_item();
 			if (output != nullptr)
-				AddItem(output);
+				add_item(output);
 
 			inventory.erase(std::remove(inventory.begin(), inventory.end(), used_item), inventory.end());
 			break;
 		}
 		case UseResult::Victory:
-			hasWon = true;
+			has_won = true;
 			break;
 		}
 
@@ -123,12 +133,13 @@ Room* Room::RunCommands(Player& player)
 
 	if (checkCommand(commandString, CombatCmd))
 	{
-		if (enemy == nullptr) {
+		if (enemy == nullptr) 
+		{
 			cout << "There is nothing to fight here\n";
 			return nullptr;
 		}
 
-		FightResult res = handleCombat(player);
+		FightResult res = handle_combat(player);
 
 		switch (res)
 		{
@@ -139,7 +150,7 @@ Room* Room::RunCommands(Player& player)
 			cout << "You have defeated your enemy, it falls to the ground unmoving.\n";
 			if (enemy->get_drop_item() != nullptr)
 			{
-				AddItem(enemy->get_drop_item());
+				add_item(enemy->get_drop_item());
 			}
 
 			enemy = nullptr;
@@ -155,8 +166,9 @@ Room* Room::RunCommands(Player& player)
 
 	if (checkCommand(commandString, InvCmd))
 	{
-		string inv = player.GetItems();
-		if (inv.size() > 0) {
+		string inv = player.get_items_string();
+		if (inv.size() > 0) 
+		{
 			cout << "You are carrying these items: " << inv << '\n';
 		}
 		else {
@@ -197,13 +209,13 @@ Room* Room::RunCommands(Player& player)
 				}
 
 				cout << "You have taken the " << roomItem->get_item_name() << '\n';
-				player.TakeItem(roomItem);
+				player.take_item(roomItem);
 				inventory.erase(inventory.begin() + dropIndex);
 			}
 			else {
 				for (Item* item : inventory)
 				{
-					player.TakeItem(item);
+					player.take_item(item);
 				}
 
 				cout << "You take everything in the room.\n";
@@ -220,8 +232,9 @@ Room* Room::RunCommands(Player& player)
 		cout << "What do you want to look at?\n";
 		cin >> look_str;
 
-		if (look_str == room) {
-			PrintDescription();
+		if (look_str == room) 
+		{
+			print_description();
 			return nullptr;
 		}
 
@@ -244,7 +257,7 @@ Room* Room::RunCommands(Player& player)
 
 	if (checkCommand(commandString, QuitCmd))
 	{
-		shouldQuit = true;
+		should_quit = true;
 		return nullptr;
 	}
 
@@ -253,11 +266,11 @@ Room* Room::RunCommands(Player& player)
 		handledCommand = true;
 
 		string item;
-		cout << "You are holding: " << player.GetItems() << "\n";
+		cout << "You are holding: " << player.get_items_string() << "\n";
 		cout << "What do you want to drop?\n";
 		cin >> item;
 
-		Item* toDrop = player.DropItem(item);
+		Item* toDrop = player.drop_item(item);
 		if (toDrop == nullptr)
 		{
 			cout << "You are not holding that item.\n";
@@ -275,12 +288,13 @@ Room* Room::RunCommands(Player& player)
 	return nullptr;
 }
 
-void Room::AddItem(Item* item) 
+void Room::add_item(Item* item)
 {
 	inventory.push_back(item);
 }
 
-void Room::PrintDescription() {
+void Room::print_description() 
+{
 	cout << "You find yourself in a " << description << ", " << formatExits() << '\n';
 	if (enemy != nullptr) 
 	{
@@ -291,24 +305,27 @@ void Room::PrintDescription() {
 	else if (inventory.size() == 1)
 		cout << "The room holds a ";
 
-	for (Item* item : inventory) {
+	for (Item* item : inventory) 
+	{
 		cout << item->get_item_name() << '\n';
 	}	
 }
 
-FightResult Room::handleCombat(Player& player)
+FightResult Room::handle_combat(Player& player)
 {
 	int health = player.get_health();
 	int enemy_health = enemy->get_health();
 
-	while (player.get_health() > 0) {
+	while (player.get_health() > 0) 
+	{
 		cout << "Your opponent stands opposite you, it has " << enemy->get_health() << " health\n";
 		cout << "You have " << player.get_health() << " health\n";
 		cout << "What do you want to do? (fight, block or flee): ";
 		string cmd;
 		cin >> cmd;
 		if (!cin) break;
-		if (cmd == fight) {
+		if (cmd == fight) 
+		{
 			int p_damage = player.get_damage(true);
 			int e_damage = enemy->get_damage();
 
@@ -323,7 +340,8 @@ FightResult Room::handleCombat(Player& player)
 			continue;
 		}
 
-		if (cmd == block) {
+		if (cmd == block) 
+		{
 			int e_damage = enemy->get_damage();
 			player.take_damage(e_damage, true);
 			if (player.get_health() == 0) break;
@@ -350,7 +368,8 @@ FightResult Room::handleCombat(Player& player)
 	return FightResult::Loss;
 }
 
-string Room::formatExits() {
+string Room::formatExits() 
+{
 	if (exits.size() > 1)
 	{
 		string exitStr = "there are exits to the ";

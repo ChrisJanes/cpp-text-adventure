@@ -33,6 +33,7 @@ void printSeparator()
 	cout << "\n*********************************************************************\n";
 }
 
+// should probably move this somewhere else.
 struct Exit : std::runtime_error {
 	Exit() : std::runtime_error("Exit") {}
 };
@@ -43,7 +44,11 @@ inline void error(const string& s)
 	throw std::runtime_error(s);
 }
 
-void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData) {
+// load file data for enemies, items and rooms.
+// these functions just load intermediary data which must then be processed to produce actual objects
+
+void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData) 
+{
 	std::ifstream is{ filename };
 	if (!is) error("failed to load enemies file");
 
@@ -54,7 +59,8 @@ void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData) {
 	}
 }
 
-void loadItems(const string& filename, std::vector<ItemFile>& itemData) {
+void loadItems(const string& filename, std::vector<ItemFile>& itemData) 
+{
 	std::ifstream is{ filename };
 	if (!is) error("failed to load items file");
 
@@ -65,7 +71,8 @@ void loadItems(const string& filename, std::vector<ItemFile>& itemData) {
 	}
 }
 
-void loadRooms(const string& filename, std::vector<RoomFile>& roomData) {
+void loadRooms(const string& filename, std::vector<RoomFile>& roomData) 
+{
 	std::ifstream is{ filename };
 	if (!is) error("failed to load room file");
 
@@ -78,11 +85,15 @@ void loadRooms(const string& filename, std::vector<RoomFile>& roomData) {
 
 vector<Room> rooms;
 
+// use the intermediary data loaded from the files and build all the required objects
+
 void buildRooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData, std::vector<EnemyFile>& enemyData )
 {
+	// create all the items first, this is just a first pass to construct the initial objects
 	vector<Item*> items;
 	for (ItemFile itemLoad : itemData)
 	{
+		// instantiate the right sort of item object
 		if (itemLoad.isCombat)
 		{
 			CombatItem* item = new CombatItem{ itemLoad.id, itemLoad.name, itemLoad.description, itemLoad.combat.attack, itemLoad.combat.health, itemLoad.combat.defense };
@@ -95,6 +106,7 @@ void buildRooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData
 		}
 	}
 
+	// once all the items are created, re-iterate the item data to setup the "use result" links (Items that create other Items when used).
 	for (ItemFile itemLoad : itemData)
 	{
 		if (itemLoad.isCombat || itemLoad.use_id == 0) continue;
@@ -103,26 +115,30 @@ void buildRooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData
 		currentItem->set_result_Item(items[itemLoad.use_id - 1]);
 	}
 
+	// iterate all the rooms and create objects
 	for (RoomFile room : roomData)
 	{
 		Room newRoom{ room.id, room.description };
+		// add enemies where necessary - the current Room object only allows for a single enemy, the file format supports multiple enemies, go figure.
 		for (int enemy_id : room.enemies)
 		{
 			for (EnemyFile enemyStats : enemyData)
 			{
 				Item* drop_item = enemyStats.drop_id == 0 ? nullptr : items[enemyStats.drop_id - 1];
 				Enemy* enemy = new Enemy{ enemyStats.name, enemyStats.description, enemyStats.combat.health, enemyStats.combat.attack, enemyStats.combat.defense, drop_item };
-				newRoom.AddEnemy(enemy);
+				newRoom.add_enemy(enemy);
 			}
 		}
 
+		// refer to the existing items to add the right items to rooms
 		for (int item_id : room.items)
 		{
-			newRoom.AddItem(items[item_id - 1]);
+			newRoom.add_item(items[item_id - 1]);
 		}
 		rooms.push_back(newRoom);
 	}
 
+	// now all the rooms are built, we can create the exit links by using the id reference values
 	for (RoomFile room : roomData)
 	{
 		Room* currentRoom = &rooms[room.id - 1];
@@ -132,17 +148,19 @@ void buildRooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData
 			Room* exitRoom = &rooms[exit.id - 1];
 			std::string direction;
 
-			switch (exit.dir) {
+			switch (exit.dir) 
+			{
 			case 'n': direction = "north"; break;
 			case 'e': direction = "east"; break;
 			case 's': direction = "south"; break;
 			case 'w': direction = "west"; break;
 			}
 
-			currentRoom->AddExit(direction, *exitRoom);
+			currentRoom->add_exit(direction, *exitRoom);
 		}
 	}
 
+	// and we can setup usable items target room values
 	for (ItemFile itemLoad : itemData)
 	{
 		if (itemLoad.room_id == 0) continue;
@@ -156,6 +174,7 @@ int main()
 {
 	Player player;
 	Room* currentRoom = nullptr;
+	// try to load data files
 	try {
 		std::vector<RoomFile> roomData;
 		std::vector<ItemFile> itemData;
@@ -169,22 +188,22 @@ int main()
 	}
 	catch (std::exception& e)
 	{
+		// we bail out if it goes wrong, we could instantiate a default room instead?
 		cout << e.what() << '\n';
 		return 1;
 	}
 
+	// starting room is always the first room loaded
 	currentRoom = &rooms[0];
 
+	// game loop
 	while (true)
 	{
 		printSeparator();
-		currentRoom->PrintDescription();
-		Room* newRoom = currentRoom->RunCommands(player);
+		currentRoom->print_description();
+		Room* newRoom = currentRoom->run_commands(player);
 
-		if (currentRoom->shouldQuit)
-			break;
-
-		if (currentRoom->hasWon)
+		if (currentRoom->should_quit || currentRoom->has_won)
 			break;
 
 		if (newRoom != nullptr)
@@ -194,7 +213,7 @@ int main()
 		}
 	}
 
-	if (currentRoom->hasWon)
+	if (currentRoom->has_won)
 		gameOver("You won!");
 	else
 		gameOver("Thanks for playing");

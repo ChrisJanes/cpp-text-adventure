@@ -17,6 +17,7 @@ public:
 	Item(int i, std::string n, std::string d, std::string u) 
 		: id{ i }, name(n), description(d), use_text(u) {}
 	
+	// we need a virtual destructor to make this play nicely with the cast from / to CombatItem
 	virtual ~Item() {};
 
 	std::string get_item_name() const { return name; }
@@ -37,10 +38,11 @@ private:
 	std::string description;
 	std::string use_text{ " " };
 	Room* target_room{ nullptr };
-	Item* use_result_item{ nullptr };
-	UseResult use_result{ UseResult::Consume };
+	Item* use_result_item{ nullptr }; // item created when this item is used in the correct room
+	UseResult use_result{ UseResult::Consume }; // most items are consumed when used (the only other choice is they trigger a victory condition)
 };
 
+// inherit from Item and add in combat stats
 class CombatItem : public Item
 {
 public:
@@ -57,5 +59,6 @@ private:
 	int defense_bonus{ 0 };
 };
 
+// overload output operators
 std::ostream& operator<<(std::ostream& ost, CombatItem& item);
 std::ostream& operator<<(std::ostream& ost, Item& item);
