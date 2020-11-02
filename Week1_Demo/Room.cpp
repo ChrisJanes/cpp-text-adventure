@@ -282,6 +282,10 @@ void Room::AddItem(Item* item)
 
 void Room::PrintDescription() {
 	cout << "You find yourself in a " << description << ", " << formatExits() << '\n';
+	if (enemy != nullptr) 
+	{
+		cout << "An " << enemy->get_name() << " stands before you, it looks angry. Fight if you think you can win.\n";
+	}
 	if (inventory.size() > 1)
 		cout << "The following items are present: \n";
 	else if (inventory.size() == 1)

@@ -1,0 +1,10 @@
+{
+    room 1 "dark hallway" 
+    {exit 2 e} 
+    {exit 3 n}
+}
+{room 2 "shabby, unkempt garden" {exit 1 w} {exit 4 s}}
+{room 3 "grotty kitchen, dishes are piled on the side" {exit 1 s} {exit 5 e} {exit 6 w} (item 1) (item 2)}
+{room 4 "rotten, tumbledown shed" {exit 2 n} (item 3)}
+{room 5 "living room, the furniture is mildewed and damp" {exit 3 w}}
+{room 6 "larder, tins of food rust on shelves" {exit 3 e} <enemy 1>}

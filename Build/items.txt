@@ -1,0 +1,5 @@
+{item 1 kettle "it's half full of stagnant water" 0 " " 0 0 }
+{item 2 sword "it's shiny and sharp" 0 " " 0 0 (combat 4 0 0) }
+{item 3 trowel "it's caked in mud and rust" 2 "you dig through the mud and find a key" 4 0 }
+{item 4 key "it looks like it will fit the front door" 1 "The key twists in the lock smoothly, the door swings open." 0 1}
+{item 5 shield "made of wood and leather, it might be sturdy" 0 " " 0 0 (combat 0 4 0)}

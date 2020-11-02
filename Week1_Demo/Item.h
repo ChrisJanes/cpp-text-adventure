@@ -12,10 +12,10 @@ enum class UseResult
 class Item
 {
 public:
-	Item(std::string n, std::string d) : name(n), description(d) {}
+	Item(int i, std::string n, std::string d) : id{ i }, name(n), description(d) {}
 
-	Item(std::string n, std::string d, std::string u, Item* itm) 
-		: name(n), description(d), use_text(u), use_result_item(itm) {}
+	Item(int i, std::string n, std::string d, std::string u) 
+		: id{ i }, name(n), description(d), use_text(u) {}
 	
 	virtual ~Item() {};
 
@@ -28,11 +28,14 @@ public:
 	UseResult get_use_result() { return use_result; }
 	void make_victory_item() { use_result = UseResult::Victory; }
 	Item* get_result_item() { return use_result_item; }
+	void set_result_Item(Item* itm) { use_result_item = itm; }
+	void set_use_text(std::string& text) { use_text = text; }
 
 private:
+	int id;
 	std::string name;
 	std::string description;
-	std::string use_text;
+	std::string use_text{ " " };
 	Room* target_room{ nullptr };
 	Item* use_result_item{ nullptr };
 	UseResult use_result{ UseResult::Consume };
@@ -41,8 +44,8 @@ private:
 class CombatItem : public Item
 {
 public:
-	CombatItem(std::string n, std::string d, int attack, int health, int defense) 
-		: Item(n, d), attack_bonus(attack), health_bonus(health), defense_bonus(defense) {}
+	CombatItem(int i, std::string n, std::string d, int attack, int health, int defense) 
+		: Item(i, n, d), attack_bonus(attack), health_bonus(health), defense_bonus(defense) {}
 
 	int get_attack_bonus() const { return attack_bonus; }
 	int get_defense_bonus() const { return defense_bonus; }

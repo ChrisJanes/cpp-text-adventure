@@ -35,7 +35,7 @@ class Room
 {
 public:
 	Room() {}
-	Room(string desc) : description(desc) {}
+	Room(int i, string desc) : id{ i }, description{ desc } {}
 
 	void AddEnemy(Enemy* en);
 	void AddExit(string dir, Room &room);
@@ -43,9 +43,9 @@ public:
 	Room* RunCommands(Player &player);
 	bool shouldQuit{ false };
 	bool hasWon{ false };
-	// You find yourself in a dark hallway, there are exits to the north and east.
 	void PrintDescription();
 private:
+	int id;
 	FightResult handleCombat(Player& player);
 
 	void getCommand();
