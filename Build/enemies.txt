@@ -1,1 +1,1 @@
-{enemy 1 orc "it's big and green, like the hulk" 5 (combat 5 2 1)}
+{enemy 1 orc "it's big and green, like the hulk" 5 (combat 2 1 5)}
