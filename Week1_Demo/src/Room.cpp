@@ -1,5 +1,5 @@
-#include "Room.h"
-#include "RoomExit.h"
+#include "../headers/Room.h"
+#include "../headers/RoomExit.h"
 
 #include <iostream>
 

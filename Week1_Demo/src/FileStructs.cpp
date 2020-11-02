@@ -1,4 +1,4 @@
-#include "FileStructs.h"
+#include "../headers/FileStructs.h"
 
 #include <exception>
 
@@ -237,7 +237,6 @@ std::istream& operator>>(std::istream& is, EnemyFile& e)
     std::string description;
     CombatStats combat;
     int drop_id;
-    char ch2;
 
     is >> marker >> id >> name;
 

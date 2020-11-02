@@ -139,21 +139,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="FileStructs.cpp" />
-    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Room.cpp" />
+    <ClCompile Include="src\Enemy.cpp" />
+    <ClCompile Include="src\FileStructs.cpp" />
+    <ClCompile Include="src\Item.cpp" />
+    <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\Room.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Enemy.h" />
-    <ClInclude Include="FileStructs.h" />
-    <ClInclude Include="Item.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Room.h" />
-    <ClInclude Include="RoomExit.h" />
-    <ClInclude Include="std_lib_facilities.h" />
+    <ClInclude Include="headers\Enemy.h" />
+    <ClInclude Include="headers\FileStructs.h" />
+    <ClInclude Include="headers\Item.h" />
+    <ClInclude Include="headers\Player.h" />
+    <ClInclude Include="headers\Room.h" />
+    <ClInclude Include="headers\RoomExit.h" />
+    <ClInclude Include="headers\std_lib_facilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

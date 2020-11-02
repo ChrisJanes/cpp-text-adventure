@@ -3,13 +3,13 @@
 #include <stdexcept>
 #include <fstream>
 
-#include "Room.h"
-#include "RoomExit.h"
-#include "Player.h"
-#include "Item.h"
-#include "Enemy.h"
+#include "headers/Room.h"
+#include "headers/RoomExit.h"
+#include "headers/Player.h"
+#include "headers/Item.h"
+#include "headers/Enemy.h"
 
-#include "FileStructs.h"
+#include "headers/FileStructs.h"
 
 /*
 5--3--6
