@@ -23,7 +23,7 @@ using std::vector;
 using std::cout;
 using std::cin;
 
-void gameOver(string message)
+void gameOver(const string &message)
 {
 	cout << "Game Over\n" << message << '\n';
 }
@@ -33,7 +33,8 @@ void printSeparator()
 	cout << "\n*********************************************************************\n";
 }
 
-struct Exit : std::runtime_error {
+struct Exit : std::runtime_error
+{
 	Exit() : std::runtime_error("Exit") {}
 };
 
@@ -43,38 +44,60 @@ inline void error(const string& s)
 	throw std::runtime_error(s);
 }
 
-void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData) {
+
+template<typename t>
+void loadDataFromFile(const string& filename, std::vector<t>& Data, const std::string& message)
+{
 	std::ifstream is{ filename };
+	if (!is) error(message);
+
+	while (is)
+	{
+		t r;
+		if (is >> r) Data.push_back(r);
+	}
+}
+
+void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData)
+{
+	/*std::ifstream is{ filename };
 	if (!is) error("failed to load enemies file");
 
 	while (is)
 	{
 		EnemyFile e;
 		if (is >> e) enemyData.push_back(e);
-	}
+	}*/
+	loadDataFromFile<EnemyFile>(filename, enemyData, "failed to load room file");
 }
 
-void loadItems(const string& filename, std::vector<ItemFile>& itemData) {
-	std::ifstream is{ filename };
+void loadItems(const string& filename, std::vector<ItemFile>& itemData)
+{
+	/*std::ifstream is{ filename };
 	if (!is) error("failed to load items file");
 
 	while (is)
 	{
 		ItemFile f;
 		if (is >> f) itemData.push_back(f);
-	}
+	}*/
+	loadDataFromFile<ItemFile>(filename, itemData, "failed to load item file");
 }
 
-void loadRooms(const string& filename, std::vector<RoomFile>& roomData) {
-	std::ifstream is{ filename };
+void loadRooms(const string& filename, std::vector<RoomFile>& roomData)
+{
+	/*std::ifstream is{ filename };
 	if (!is) error("failed to load room file");
 
 	while (is)
 	{
 		RoomFile r;
 		if(is >> r) roomData.push_back(r);
-	}
+	}*/
+	loadDataFromFile<RoomFile>(filename, roomData, "failed to load room file");
 }
+
+
 
 vector<Room> rooms;
 
