@@ -68,7 +68,7 @@ void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData)
 		EnemyFile e;
 		if (is >> e) enemyData.push_back(e);
 	}*/
-	loadDataFromFile<EnemyFile>(filename, enemyData, "failed to load room file");
+	loadDataFromFile<EnemyFile>(filename, enemyData, "failed to load enemies file");
 }
 
 void loadItems(const string& filename, std::vector<ItemFile>& itemData)
@@ -184,9 +184,9 @@ int main()
 		std::vector<ItemFile> itemData;
 		std::vector<EnemyFile> enemyData;
 
-		loadRooms("rooms.txt", roomData);
-		loadItems("items.txt", itemData);
-		loadEnemies("enemies.txt", enemyData);
+		loadRooms("Build\\rooms.txt", roomData);
+		loadItems("Build\\items.txt", itemData);
+		loadEnemies("Build\\enemies.txt", enemyData);
 
 		buildRooms(roomData, itemData, enemyData);
 	}
@@ -204,10 +204,10 @@ int main()
 		currentRoom->PrintDescription();
 		Room* newRoom = currentRoom->RunCommands(player);
 
-		if (currentRoom->shouldQuit)
+		if (currentRoom->M_ShouldQuit)
 			break;
 
-		if (currentRoom->hasWon)
+		if (currentRoom->M_HasWon)
 			break;
 
 		if (newRoom != nullptr)
@@ -217,7 +217,7 @@ int main()
 		}
 	}
 
-	if (currentRoom->hasWon)
+	if (currentRoom->M_HasWon)
 		gameOver("You won!");
 	else
 		gameOver("Thanks for playing");

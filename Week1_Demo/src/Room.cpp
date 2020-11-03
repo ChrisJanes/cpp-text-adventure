@@ -6,9 +6,9 @@
 using std::cout;
 using std::cin;
 
-inline bool checkCommand(string cmd, const vector<string> commands)
+inline bool checkCommand(const string cmd, const vector<string>& commands)
 {
-	for (const string dir : commands)
+	for (const string& dir : commands)
 	{
 		if (cmd == dir)
 			return true;
@@ -17,19 +17,19 @@ inline bool checkCommand(string cmd, const vector<string> commands)
 	return false;
 }
 
-void Room::getCommand()
+void Room::GetCommand()
 {
 	cout << "What do you want to do?\n";
-	cin >> commandString;
+	cin >> m_CommandString;
 	//if (!cin) error("error handling user input.\n");
 }
 
-bool Room::print_item(Item* item, string name)
+bool Room::PrintItem(Item* item, const string& name)
 {
 	if (item->get_item_name() == name)
 	{
 		if (dynamic_cast<CombatItem*>(item))
-			cout << *(CombatItem*)item;
+			cout << *static_cast<CombatItem*>(item);
 		else
 			cout << *item;
 
@@ -41,34 +41,34 @@ bool Room::print_item(Item* item, string name)
 
 void Room::AddEnemy(Enemy* en)
 {
-	if (enemy != nullptr) return;
+	if (m_Enemy != nullptr) return;
 
-	enemy = en;
+	m_Enemy = en;
 }
 
-void Room::AddExit(string dir, Room &room)
+void Room::AddExit(const string& dir, Room &room)
 {
-	RoomExit exit{ dir, room };
-	exits.push_back(exit);
+	const RoomExit exit{ dir, room };
+	m_Exits.push_back(exit);
 }
 
 Room* Room::RunCommands(Player& player)
 {
-	shouldQuit = false;
-	commandString = "";
-	getCommand();
+	M_ShouldQuit = false;
+	m_CommandString = "";
+	GetCommand();
 	bool handledCommand = false;
 
-	if (commandString == "") return nullptr;
+	if (m_CommandString.empty()) return nullptr;
 
-	for (RoomExit exit : exits) {
-		if (commandString == exit.direction)
+	for (RoomExit exit : m_Exits) {
+		if (m_CommandString == exit.direction)
 		{
 			return &exit.exitLocation;
 		}
 	}
 
-	if (checkCommand(commandString, UseCmd))
+	if (checkCommand(m_CommandString, USE_CMD))
 	{
 		string item_str;
 		cout << "What do you want to use?\n";
@@ -110,42 +110,42 @@ Room* Room::RunCommands(Player& player)
 			if (output != nullptr)
 				AddItem(output);
 
-			inventory.erase(std::remove(inventory.begin(), inventory.end(), used_item), inventory.end());
+			m_Inventory.erase(std::remove(m_Inventory.begin(), m_Inventory.end(), used_item), m_Inventory.end());
 			break;
 		}
 		case UseResult::Victory:
-			hasWon = true;
+			M_HasWon = true;
 			break;
 		}
 
 		return nullptr;
 	}
 
-	if (checkCommand(commandString, CombatCmd))
+	if (checkCommand(m_CommandString, COMBAT_CMD))
 	{
-		if (enemy == nullptr) {
+		if (m_Enemy == nullptr) {
 			cout << "There is nothing to fight here\n";
 			return nullptr;
 		}
 
-		FightResult res = handleCombat(player);
+        const FIGHT_RESULT res = HandleCombat(player);
 
 		switch (res)
 		{
-		case FightResult::Loss:
+		case FIGHT_RESULT::LOSS:
 			cout << "You have taken a battering, you fall to the ground unconscious. Some time passes before you awake.\n";
 			break;
-		case FightResult::Victory:
+		case FIGHT_RESULT::VICTORY:
 			cout << "You have defeated your enemy, it falls to the ground unmoving.\n";
-			if (enemy->get_drop_item() != nullptr)
+			if (m_Enemy->get_drop_item() != nullptr)
 			{
-				AddItem(enemy->get_drop_item());
+				AddItem(m_Enemy->get_drop_item());
 			}
 
-			enemy = nullptr;
+			m_Enemy = nullptr;
 
 			break;
-		case FightResult::Flee:
+		case FIGHT_RESULT::FLEE:
 			cout << "You ran from an unwinnable situation, maybe next time?\n";
 			break;
 		}
@@ -153,10 +153,10 @@ Room* Room::RunCommands(Player& player)
 		return nullptr;
 	}
 
-	if (checkCommand(commandString, InvCmd))
+	if (checkCommand(m_CommandString, INV_CMD))
 	{
-		string inv = player.GetItems();
-		if (inv.size() > 0) {
+		const string inv = player.GetItems();
+		if (!inv.empty()) {
 			cout << "You are carrying these items: " << inv << '\n';
 		}
 		else {
@@ -165,10 +165,10 @@ Room* Room::RunCommands(Player& player)
 		return nullptr;
 	}
 
-	if (checkCommand(commandString, TakeCmd))
+	if (checkCommand(m_CommandString, TAKE_CMD))
 	{
 		handledCommand = true;
-		if (inventory.size() == 0)
+		if (m_Inventory.empty())
 			cout << "There is nothing here to take\n";
 		else
 		{
@@ -180,7 +180,7 @@ Room* Room::RunCommands(Player& player)
 
 			if (item_str != "all")
 			{
-				for (Item* item : inventory)
+				for (Item* item : m_Inventory)
 				{
 					if (item->get_item_name() == item_str)
 					{
@@ -198,29 +198,29 @@ Room* Room::RunCommands(Player& player)
 
 				cout << "You have taken the " << roomItem->get_item_name() << '\n';
 				player.TakeItem(roomItem);
-				inventory.erase(inventory.begin() + dropIndex);
+				m_Inventory.erase(m_Inventory.begin() + dropIndex);
 			}
 			else {
-				for (Item* item : inventory)
+				for (Item* item : m_Inventory)
 				{
 					player.TakeItem(item);
 				}
 
 				cout << "You take everything in the room.\n";
-				inventory.erase(inventory.begin(), inventory.end());
+				m_Inventory.erase(m_Inventory.begin(), m_Inventory.end());
 			}
 		}
 		
 		return nullptr;
 	}
 
-	if (checkCommand(commandString, LookCmd))
+	if (checkCommand(m_CommandString, LOOK_CMD))
 	{
 		string look_str;
 		cout << "What do you want to look at?\n";
 		cin >> look_str;
 
-		if (look_str == room) {
+		if (look_str == ROOM) {
 			PrintDescription();
 			return nullptr;
 		}
@@ -228,27 +228,27 @@ Room* Room::RunCommands(Player& player)
 		for (Item* item : player.get_inventory())
 		{
 			if (item == nullptr) continue;
-			bool found = print_item(item, look_str);
+			bool found = PrintItem(item, look_str);
 			if (found) return nullptr;
 		}
 
-		for (Item* item : inventory)
+		for (Item* item : m_Inventory)
 		{
 			if (item == nullptr) continue;
-			bool found = print_item(item, look_str);
+			bool found = PrintItem(item, look_str);
 			if (found) return nullptr;
 		}
 
 		cout << "You cannot see that item anywhere near you.\n";
 	}
 
-	if (checkCommand(commandString, QuitCmd))
+	if (checkCommand(m_CommandString, QUIT_CMD))
 	{
-		shouldQuit = true;
+		M_ShouldQuit = true;
 		return nullptr;
 	}
 
-	if (checkCommand(commandString, DropCmd))
+	if (checkCommand(m_CommandString, DROP_CMD))
 	{
 		handledCommand = true;
 
@@ -265,7 +265,7 @@ Room* Room::RunCommands(Player& player)
 		}
 		else 
 		{
-			inventory.push_back(toDrop);
+			m_Inventory.push_back(toDrop);
 		}
 	}
 
@@ -277,96 +277,96 @@ Room* Room::RunCommands(Player& player)
 
 void Room::AddItem(Item* item) 
 {
-	inventory.push_back(item);
+	m_Inventory.push_back(item);
 }
 
 void Room::PrintDescription() {
-	cout << "You find yourself in a " << description << ", " << formatExits() << '\n';
-	if (enemy != nullptr) 
+	cout << "You find yourself in a " << m_Description << ", " << formatExits() << '\n';
+	if (m_Enemy != nullptr) 
 	{
-		cout << "An " << enemy->get_name() << " stands before you, it looks angry. Fight if you think you can win.\n";
+		cout << "An " << m_Enemy->get_name() << " stands before you, it looks angry. Fight if you think you can win.\n";
 	}
-	if (inventory.size() > 1)
+	if (m_Inventory.size() > 1)
 		cout << "The following items are present: \n";
-	else if (inventory.size() == 1)
+	else if (m_Inventory.size() == 1)
 		cout << "The room holds a ";
 
-	for (Item* item : inventory) {
+	for (Item* item : m_Inventory) {
 		cout << item->get_item_name() << '\n';
 	}	
 }
 
-FightResult Room::handleCombat(Player& player)
+FIGHT_RESULT Room::HandleCombat(Player& player) const
 {
-	int health = player.get_health();
-	int enemy_health = enemy->get_health();
+	const int health = player.GetHealth();
+	const int enemy_health = m_Enemy->get_health();
 
-	while (player.get_health() > 0) {
-		cout << "Your opponent stands opposite you, it has " << enemy->get_health() << " health\n";
-		cout << "You have " << player.get_health() << " health\n";
+	while (player.GetHealth() > 0) {
+		cout << "Your opponent stands opposite you, it has " << m_Enemy->get_health() << " health\n";
+		cout << "You have " << player.GetHealth() << " health\n";
 		cout << "What do you want to do? (fight, block or flee): ";
 		string cmd;
 		cin >> cmd;
 		if (!cin) break;
-		if (cmd == fight) {
-			int p_damage = player.get_damage(true);
-			int e_damage = enemy->get_damage();
+		if (cmd == FIGHT) {
+			const int p_damage = player.GetDamage(true);
+			const int e_damage = m_Enemy->get_damage();
 
-			enemy->take_damage(p_damage);
-			if (enemy->is_dead())
+			m_Enemy->take_damage(p_damage);
+			if (m_Enemy->is_dead())
 			{
-				player.set_health(health);
-				return FightResult::Victory;
+				player.SetHealth(health);
+				return FIGHT_RESULT::VICTORY;
 			}
 
-			player.take_damage(e_damage, false);
+			player.TakeDamage(e_damage, false);
 			continue;
 		}
 
-		if (cmd == block) {
-			int e_damage = enemy->get_damage();
-			player.take_damage(e_damage, true);
-			if (player.get_health() == 0) break;
+		if (cmd == BLOCK) {
+			const int e_damage = m_Enemy->get_damage();
+			player.TakeDamage(e_damage, true);
+			if (player.GetHealth() == 0) break;
 
-			int p_damage = player.get_damage(false);
-			enemy->take_damage(p_damage);
-			if (!enemy->is_dead())
+			const int p_damage = player.GetDamage(false);
+			m_Enemy->take_damage(p_damage);
+			if (!m_Enemy->is_dead())
 			{
-				player.set_health(health);
-				return FightResult::Victory;
+				player.SetHealth(health);
+				return FIGHT_RESULT::VICTORY;
 			}
 		}
 
-		if (cmd == flee)
+		if (cmd == FLEE)
 		{
-			enemy->set_health(enemy_health);
-			return FightResult::Flee;
+			m_Enemy->set_health(enemy_health);
+			return FIGHT_RESULT::FLEE;
 		}
 	}
 
-	player.set_health(health);
-	enemy->set_health(enemy_health);
+	player.SetHealth(health);
+	m_Enemy->set_health(enemy_health);
 
-	return FightResult::Loss;
+	return FIGHT_RESULT::LOSS;
 }
 
 string Room::formatExits() {
-	if (exits.size() > 1)
+	if (m_Exits.size() > 1)
 	{
-		string exitStr = "there are exits to the ";
-		for (int i = 0; i < exits.size(); ++i)
+		string exit_str = "there are exits to the ";
+		for (int i = 0; i < m_Exits.size(); ++i)
 		{
-			if (i == exits.size() - 1)
-				exitStr += " and ";
+			if (i == m_Exits.size() - 1)
+				exit_str += " and ";
 
-			exitStr += exits[i].direction;
+			exit_str += m_Exits[i].direction;
 
-			if (exits.size() > 2 &&  i < exits.size() - 2)
-				exitStr += ", ";
+			if (m_Exits.size() > 2 &&  i < m_Exits.size() - 2)
+				exit_str += ", ";
 		}
-		return exitStr;
+		return exit_str;
 	}
 	else {
-		return "there is an exit to the " + exits[0].direction;
+		return "there is an exit to the " + m_Exits[0].direction;
 	}
 }

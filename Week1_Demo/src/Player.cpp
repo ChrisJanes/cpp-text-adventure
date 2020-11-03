@@ -4,35 +4,35 @@
 
 string Player::GetItems() 
 {
-	string itemList = "";
-	for (int i = 0; i < inventory.size(); ++i)
+	string itemList;
+	for (uint32_t i = 0; i < M_Inventory.size(); ++i)
 	{
-		itemList += inventory[i]->get_item_name();
+		itemList += M_Inventory[i]->get_item_name();
 
-		if (i < inventory.size() - 1)
+		if (i < M_Inventory.size() - 1)
 			itemList += ", ";
 	}
 
 	return itemList;
 }
 
-void Player::take_damage(int d, bool block)
+void Player::TakeDamage(int d, bool block)
 {
 	int damage = d;
 	if ( block )
-		damage = std::max(0, d - defense);
-	health = std::max(0, health - damage);
+		damage = std::max(0, d - M_Defense);
+	M_Health = std::max(0, M_Health - damage);
 }
 
-int Player::get_damage(bool bonus) const
+int Player::GetDamage(bool bonus) const
 {
-	int damage = attack;
+	int damage = M_Attack;
 
 	if (bonus)
 	{
-		for (int i = 0; i < inventory.size(); ++i)
+		for (uint32_t i = 0; i < M_Inventory.size(); ++i)
 		{
-			Item* current = inventory[i];
+			Item* current = M_Inventory[i];
 			CombatItem* item = dynamic_cast<CombatItem*>(current);
 			if (item != nullptr) {
 				damage += item->get_attack_bonus();
@@ -45,18 +45,18 @@ int Player::get_damage(bool bonus) const
 
 void Player::TakeItem(Item* item)
 {
-	inventory.push_back(item);
+	M_Inventory.push_back(item);
 }
 
 Item* Player::DropItem(string item)
 {
 	Item* toDrop = nullptr;
 	int dropIndex = -1;
-	for (int i = 0; i < inventory.size(); ++i)
+	for (uint32_t i = 0; i < M_Inventory.size(); ++i)
 	{
-		if (inventory[i]->get_item_name() == item)
+		if (M_Inventory[i]->get_item_name() == item)
 		{
-			toDrop = inventory[i];
+			toDrop = M_Inventory[i];
 			dropIndex = i;
 			break;
 		}
@@ -64,7 +64,7 @@ Item* Player::DropItem(string item)
 
 	if (toDrop == nullptr) return toDrop;
 
-	inventory.erase(inventory.begin() + dropIndex);
+	M_Inventory.erase(M_Inventory.begin() + dropIndex);
 
 	return toDrop;
 }
