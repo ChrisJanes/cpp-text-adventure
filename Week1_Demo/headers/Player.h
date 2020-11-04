@@ -12,16 +12,16 @@ public:
 	Item* DropItem(string item);
 	string GetItems();
 
-	int GetHealth() const { return M_Health; }
+	[[nodiscard]] int GetHealth() const { return m_Health; }
 	void TakeDamage(int d, bool block);
-	int GetDamage(bool bonus) const;
-	void SetHealth(int n) { M_Health = n; }
+	[[nodiscard]] int GetDamage(bool bonus) const;
+	void SetHealth(const int n) { m_Health = n; }
 
-	vector<Item*> get_inventory() const { return M_Inventory; }
+	[[nodiscard]] vector<Item*> GetInventory() const { return m_Inventory; }
 
 private:
-	vector<Item*> M_Inventory;
-	int M_Health{ 10 };
-	int M_Attack{ 1 };
-	int M_Defense{ 0 };
+	vector<Item*> m_Inventory;
+	int m_Health{ 10 };
+	int m_Attack{ 1 };
+	int m_Defense{ 0 };
 };

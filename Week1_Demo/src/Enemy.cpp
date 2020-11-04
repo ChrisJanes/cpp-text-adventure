@@ -1,8 +1,8 @@
 #include "../headers/Enemy.h"
 #include <algorithm>
 
-void Enemy::take_damage(int d)
+void Enemy::TakeDamage(const int d)
 {
-	int damage = std::max(0, d - defense);
-	health = std::max(0, health - damage);
+    const int damage = std::max(0, d - m_Defense);
+	m_Health = std::max(0, m_Health - damage);
 }

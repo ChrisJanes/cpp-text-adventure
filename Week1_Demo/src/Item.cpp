@@ -1,8 +1,8 @@
 #include "../headers/Item.h"
 
-bool Item::can_use(Room* currentRoom)
+bool Item::CanUse(Room* currentRoom) const
 {
-	if(currentRoom != target_room)
+	if(currentRoom != m_TargetRoom)
 		return false;
 
 	return true;
@@ -10,9 +10,9 @@ bool Item::can_use(Room* currentRoom)
 
 std::ostream& operator<<(std::ostream& ost, CombatItem& item)
 {
-	int attack = item.get_attack_bonus();
-	int defense = item.get_defense_bonus();
-	int health = item.get_health_bonus();
+    const int attack = item.GetAttackBonus();
+    const int defense = item.GetDefenseBonus();
+    const int health = item.GetHealthBonus();
 	return ost << item.get_item_name() << ", " << item.get_item_description() << "\n\tattack: " << attack << "\n\tdefense: " << defense << "\n\thealth: " << health;
 }
 

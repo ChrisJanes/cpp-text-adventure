@@ -47,8 +47,8 @@ std::istream& operator>>(std::istream& is, ExitFile& e)
     
     if (!is || ch2 != '}') throw std::exception("bad exit file");
 
-    e.dir = dir;
-    e.id = room_id;
+    e.M_Dir = dir;
+    e.M_Id = room_id;
 
     return is;
 }
@@ -70,7 +70,7 @@ std::istream& operator>>(std::istream& is, ItemId& i)
 
     if (!is || ch2 != ')') throw std::exception("bad item id");
 
-    i.id = item_id;
+    i.M_Id = item_id;
 
     return is;
 }
@@ -92,7 +92,7 @@ std::istream& operator>>(std::istream& is, EnemyId& e)
 
     if (!is || ch2 != '>') throw std::exception("bad item id");
 
-    e.id = enemy_id;
+    e.M_Id = enemy_id;
 
     return is;
 }
@@ -123,20 +123,20 @@ std::istream& operator>>(std::istream& is, RoomFile& r)
 
     for (ItemId i; is >> i;)
     {
-        r.items.push_back(i.id);
+        r.items.push_back(i.M_Id);
     }
 
     is.clear();
 
     for (EnemyId e; is >> e;)
     {
-        r.enemies.push_back(e.id);
+        r.enemies.push_back(e.M_Id);
     }
 
     end_of_loop(is, '}', "bad end of room");
 
     r.description = description;
-    r.id = id;
+    r.M_Id = id;
 
     return is;
 }
@@ -161,9 +161,9 @@ std::istream& operator>>(std::istream& is, CombatStats& c)
 
     if (!is || ch2 != ')') throw std::exception("bad combat block");
 
-    c.attack = attack;
-    c.defense = defense;
-    c.health = health;
+    c.M_Attack = attack;
+    c.M_Defense = defense;
+    c.M_Health = health;
 
     return is;
 }
@@ -206,15 +206,15 @@ std::istream& operator>>(std::istream& is, ItemFile& i)
 
     end_of_loop(is, '}', "bad end of item");
 
-    i.id = id;
-    i.description = description;
-    i.name = name;
-    i.room_id = room_id;
-    i.use_text = use_text;
-    i.use_id = use_id;
-    i.victory = victory;
-    i.combat = combat;
-    if (combat.attack > 0 || combat.defense > 0 || combat.health > 0) i.isCombat = true;
+    i.M_Id = id;
+    i.M_Description = description;
+    i.M_Name = name;
+    i.M_RoomId = room_id;
+    i.M_UseText = use_text;
+    i.M_UseId = use_id;
+    i.M_Victory = victory;
+    i.M_Combat = combat;
+    if (combat.M_Attack > 0 || combat.M_Defense > 0 || combat.M_Health > 0) i.M_IsCombat = true;
 
     return is;
 }
@@ -250,11 +250,11 @@ std::istream& operator>>(std::istream& is, EnemyFile& e)
 
     end_of_loop(is, '}', "bad enemy");
 
-    e.id = id;
-    e.combat = combat;
-    e.name = name;
-    e.description = description;
-    e.drop_id = drop_id;
+    e.M_Id = id;
+    e.M_Combat = combat;
+    e.M_Name = name;
+    e.M_Description = description;
+    e.M_DropId = drop_id;
 
     return is;
 }

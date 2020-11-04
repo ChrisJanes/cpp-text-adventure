@@ -23,17 +23,17 @@ using std::vector;
 using std::cout;
 using std::cin;
 
-void gameOver(const string &message)
+void game_over(const string &message)
 {
 	cout << "Game Over\n" << message << '\n';
 }
 
-void printSeparator()
+void print_separator()
 {
 	cout << "\n*********************************************************************\n";
 }
 
-struct Exit : std::runtime_error
+struct Exit final: std::runtime_error
 {
 	Exit() : std::runtime_error("Exit") {}
 };
@@ -46,7 +46,7 @@ inline void error(const string& s)
 
 
 template<typename t>
-void loadDataFromFile(const string& filename, std::vector<t>& Data, const std::string& message)
+void load_data_from_file(const string& filename, std::vector<t>& Data, const std::string& message)
 {
 	std::ifstream is{ filename };
 	if (!is) error(message);
@@ -58,7 +58,7 @@ void loadDataFromFile(const string& filename, std::vector<t>& Data, const std::s
 	}
 }
 
-void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData)
+void load_enemies(const string &filename, std::vector<EnemyFile> &enemyData)
 {
 	/*std::ifstream is{ filename };
 	if (!is) error("failed to load enemies file");
@@ -68,10 +68,10 @@ void loadEnemies(const string &filename, std::vector<EnemyFile> &enemyData)
 		EnemyFile e;
 		if (is >> e) enemyData.push_back(e);
 	}*/
-	loadDataFromFile<EnemyFile>(filename, enemyData, "failed to load enemies file");
+	load_data_from_file<EnemyFile>(filename, enemyData, "failed to load enemies file");
 }
 
-void loadItems(const string& filename, std::vector<ItemFile>& itemData)
+void load_items(const string& filename, std::vector<ItemFile>& itemData)
 {
 	/*std::ifstream is{ filename };
 	if (!is) error("failed to load items file");
@@ -81,10 +81,10 @@ void loadItems(const string& filename, std::vector<ItemFile>& itemData)
 		ItemFile f;
 		if (is >> f) itemData.push_back(f);
 	}*/
-	loadDataFromFile<ItemFile>(filename, itemData, "failed to load item file");
+	load_data_from_file<ItemFile>(filename, itemData, "failed to load item file");
 }
 
-void loadRooms(const string& filename, std::vector<RoomFile>& roomData)
+void load_rooms(const string& filename, std::vector<RoomFile>& roomData)
 {
 	/*std::ifstream is{ filename };
 	if (!is) error("failed to load room file");
@@ -94,47 +94,47 @@ void loadRooms(const string& filename, std::vector<RoomFile>& roomData)
 		RoomFile r;
 		if(is >> r) roomData.push_back(r);
 	}*/
-	loadDataFromFile<RoomFile>(filename, roomData, "failed to load room file");
+	load_data_from_file<RoomFile>(filename, roomData, "failed to load room file");
 }
 
 
 
-vector<Room> rooms;
+vector<Room> ROOMS;
 
-void buildRooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData, std::vector<EnemyFile>& enemyData )
+void build_rooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData, std::vector<EnemyFile>& enemyData )
 {
 	vector<Item*> items;
-	for (ItemFile itemLoad : itemData)
+	for (const ItemFile& itemLoad : itemData)
 	{
-		if (itemLoad.isCombat)
+		if (itemLoad.M_IsCombat)
 		{
-			CombatItem* item = new CombatItem{ itemLoad.id, itemLoad.name, itemLoad.description, itemLoad.combat.attack, itemLoad.combat.health, itemLoad.combat.defense };
+			CombatItem* item = new CombatItem{ itemLoad.M_Id, itemLoad.M_Name, itemLoad.M_Description, itemLoad.M_Combat.M_Attack, itemLoad.M_Combat.M_Health, itemLoad.M_Combat.M_Defense };
 			items.push_back(item);
 		}
 		else {
-			Item* item = new Item{itemLoad.id, itemLoad.name, itemLoad.description, itemLoad.use_text};
-			if (itemLoad.victory) item->make_victory_item();
+			Item* item = new Item{itemLoad.M_Id, itemLoad.M_Name, itemLoad.M_Description, itemLoad.M_UseText};
+			if (itemLoad.M_Victory) item->MakeVictoryItem();
 			items.push_back(item);
 		}
 	}
 
-	for (ItemFile itemLoad : itemData)
+	for (const ItemFile& itemLoad : itemData)
 	{
-		if (itemLoad.isCombat || itemLoad.use_id == 0) continue;
+		if (itemLoad.M_IsCombat || itemLoad.M_UseId == 0) continue;
 
-		Item* currentItem = items[itemLoad.id - 1];
-		currentItem->set_result_Item(items[itemLoad.use_id - 1]);
+		Item* currentItem = items[itemLoad.M_Id - 1];
+		currentItem->SetResultItem(items[itemLoad.M_UseId - 1]);
 	}
 
-	for (RoomFile room : roomData)
+	for (const RoomFile& room : roomData)
 	{
-		Room newRoom{ room.id, room.description };
+		Room newRoom{ room.M_Id, room.description };
 		for (int enemy_id : room.enemies)
 		{
-			for (EnemyFile enemyStats : enemyData)
+			for (const EnemyFile& enemyStats : enemyData)
 			{
-				Item* drop_item = enemyStats.drop_id == 0 ? nullptr : items[enemyStats.drop_id - 1];
-				Enemy* enemy = new Enemy{ enemyStats.name, enemyStats.description, enemyStats.combat.health, enemyStats.combat.attack, enemyStats.combat.defense, drop_item };
+				Item* drop_item = enemyStats.M_DropId == 0 ? nullptr : items[enemyStats.M_DropId - 1];
+				Enemy* enemy = new Enemy{ enemyStats.M_Name, enemyStats.M_Description, enemyStats.M_Combat.M_Health, enemyStats.M_Combat.M_Attack, enemyStats.M_Combat.M_Defense, drop_item };
 				newRoom.AddEnemy(enemy);
 			}
 		}
@@ -143,19 +143,19 @@ void buildRooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData
 		{
 			newRoom.AddItem(items[item_id - 1]);
 		}
-		rooms.push_back(newRoom);
+		ROOMS.push_back(newRoom);
 	}
 
-	for (RoomFile room : roomData)
+	for (const RoomFile& room : roomData)
 	{
-		Room* currentRoom = &rooms[room.id - 1];
+		Room* currentRoom = &ROOMS[room.M_Id - 1];
 
 		for (ExitFile exit : room.exits)
 		{
-			Room* exitRoom = &rooms[exit.id - 1];
+			Room* exitRoom = &ROOMS[exit.M_Id - 1];
 			std::string direction;
 
-			switch (exit.dir) {
+			switch (exit.M_Dir) {
 			case 'n': direction = "north"; break;
 			case 'e': direction = "east"; break;
 			case 's': direction = "south"; break;
@@ -166,29 +166,29 @@ void buildRooms(std::vector<RoomFile>& roomData, std::vector<ItemFile>& itemData
 		}
 	}
 
-	for (ItemFile itemLoad : itemData)
+	for (const ItemFile& item_load : itemData)
 	{
-		if (itemLoad.room_id == 0) continue;
+		if (item_load.M_RoomId == 0) continue;
 
-		Item* currentItem = items[itemLoad.id - 1];
-		currentItem->set_target_room(&rooms[itemLoad.room_id - 1]);
+		Item* currentItem = items[item_load.M_Id - 1];
+		currentItem->set_target_room(&ROOMS[item_load.M_RoomId - 1]);
 	}
 }
 
 int main()
 {
 	Player player;
-	Room* currentRoom = nullptr;
+	Room* current_room = nullptr;
 	try {
-		std::vector<RoomFile> roomData;
-		std::vector<ItemFile> itemData;
-		std::vector<EnemyFile> enemyData;
+		std::vector<RoomFile> room_data;
+		std::vector<ItemFile> item_data;
+		std::vector<EnemyFile> enemy_data;
 
-		loadRooms("Build\\rooms.txt", roomData);
-		loadItems("Build\\items.txt", itemData);
-		loadEnemies("Build\\enemies.txt", enemyData);
+		load_rooms("Build\\rooms.txt", room_data);
+		load_items("Build\\items.txt", item_data);
+		load_enemies("Build\\enemies.txt", enemy_data);
 
-		buildRooms(roomData, itemData, enemyData);
+		build_rooms(room_data, item_data, enemy_data);
 	}
 	catch (std::exception& e)
 	{
@@ -196,31 +196,31 @@ int main()
 		return 1;
 	}
 
-	currentRoom = &rooms[0];
+	current_room = &ROOMS[0];
 
 	while (true)
 	{
-		printSeparator();
-		currentRoom->PrintDescription();
-		Room* newRoom = currentRoom->RunCommands(player);
+		print_separator();
+		current_room->PrintDescription();
+		Room* newRoom = current_room->RunCommands(player);
 
-		if (currentRoom->M_ShouldQuit)
+		if (current_room->M_ShouldQuit)
 			break;
 
-		if (currentRoom->M_HasWon)
+		if (current_room->M_HasWon)
 			break;
 
 		if (newRoom != nullptr)
 		{
 			system("cls");
-			currentRoom = newRoom;
+			current_room = newRoom;
 		}
 	}
 
-	if (currentRoom->M_HasWon)
-		gameOver("You won!");
+	if (current_room->M_HasWon)
+		game_over("You won!");
 	else
-		gameOver("Thanks for playing");
+		game_over("Thanks for playing");
 
 	return 0;
 }

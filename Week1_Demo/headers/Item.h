@@ -4,57 +4,57 @@
 
 class Room;
 
-enum class UseResult
+enum class USE_RESULT
 {
-	Consume, Victory
+	CONSUME, VICTORY
 };
 
 class Item
 {
 public:
-	Item(int i, std::string n, std::string d) : id{ i }, name(n), description(d) {}
+	Item(const int i, std::string n, std::string d) : m_Id{ i }, m_Name(std::move(n)), m_Description(std::move(d)) {};
 
-	Item(int i, std::string n, std::string d, std::string u) 
-		: id{ i }, name(n), description(d), use_text(u) {}
+	Item(int i, std::string n, std::string d, std::string u)
+		: m_Id{ i }, m_Name(std::move(n)), m_Description(std::move(d)), m_UseText(std::move(u)) {};
 	
-	virtual ~Item() {};
+	virtual ~Item() = default;
 
-	std::string get_item_name() const { return name; }
-	std::string get_item_description() const { return description; }
-	std::string get_use_text() const { return use_text; }
-	void set_target_room(Room* rm) { target_room = rm; }
+    [[nodiscard]] std::string get_item_name() const { return m_Name; }
+	[[nodiscard]] std::string get_item_description() const { return m_Description; }
+	[[nodiscard]] std::string get_use_text() const { return m_UseText; }
+	 void set_target_room(Room* rm) { m_TargetRoom = rm; }
 
-	bool can_use(Room* currentRoom);
-	UseResult get_use_result() { return use_result; }
-	void make_victory_item() { use_result = UseResult::Victory; }
-	Item* get_result_item() { return use_result_item; }
-	void set_result_Item(Item* itm) { use_result_item = itm; }
-	void set_use_text(std::string& text) { use_text = text; }
+	bool CanUse(Room* currentRoom) const;
+	[[nodiscard]] USE_RESULT GetUseResult() const { return m_UseResult; }
+	void MakeVictoryItem() { m_UseResult = USE_RESULT::VICTORY; }
+	[[nodiscard]] Item* GetResultItem() const { return m_UseResultItem; }
+	void SetResultItem(Item* itm) { m_UseResultItem = itm; }
+	void SetUseText(std::string& text) { m_UseText = text; }
 
 private:
-	int id;
-	std::string name;
-	std::string description;
-	std::string use_text{ " " };
-	Room* target_room{ nullptr };
-	Item* use_result_item{ nullptr };
-	UseResult use_result{ UseResult::Consume };
+	int m_Id;
+	std::string m_Name;
+	std::string m_Description;
+	std::string m_UseText{ " " };
+	Room* m_TargetRoom{ nullptr };
+	Item* m_UseResultItem{ nullptr };
+	USE_RESULT m_UseResult{ USE_RESULT::CONSUME };
 };
 
-class CombatItem : public Item
+class CombatItem final: public Item
 {
 public:
-	CombatItem(int i, std::string n, std::string d, int attack, int health, int defense) 
-		: Item(i, n, d), attack_bonus(attack), health_bonus(health), defense_bonus(defense) {}
+	CombatItem(const int i, const std::string n, const std::string d, const int attack, const int health, const int defense) 
+		: Item(i, n, d), m_AttackBonus(attack), m_HealthBonus(health), m_DefenseBonus(defense) {}
 
-	int get_attack_bonus() const { return attack_bonus; }
-	int get_defense_bonus() const { return defense_bonus; }
-	int get_health_bonus() const { return health_bonus; }
+ 	[[nodiscard]] int GetAttackBonus() const { return m_AttackBonus; }
+	[[nodiscard]] int GetDefenseBonus() const { return m_DefenseBonus; }
+	[[nodiscard]] int GetHealthBonus() const { return m_HealthBonus; }
 
 private:	
-	int attack_bonus{ 0 };
-	int health_bonus{ 0 };
-	int defense_bonus{ 0 };
+	int m_AttackBonus{ 0 };
+	int m_HealthBonus{ 0 };
+	int m_DefenseBonus{ 0 };
 };
 
 std::ostream& operator<<(std::ostream& ost, CombatItem& item);

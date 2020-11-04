@@ -62,12 +62,13 @@ private:
     int m_Id;
     FIGHT_RESULT HandleCombat(Player& player) const;
 
-    void GetCommand();
+    static string GetCommandFromPlayer();
+    static string GetCommandParameter();
     static bool PrintItem(Item* item, const string& name);
 
     Enemy* m_Enemy{nullptr};
 
-    string m_CommandString;
+    //string m_CommandString;
     string formatExits();
     string m_Description;
     std::vector<RoomExit> m_Exits;
